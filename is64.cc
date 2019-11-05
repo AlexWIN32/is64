@@ -6,6 +6,7 @@
 #include <sstream>
 #include <algorithm>
 
+#if defined(__linux__)
 std::string read_proc()
 {
     FILE *file = fopen("/proc/cpuinfo", "r");
@@ -60,6 +61,23 @@ bool is_64()
 
     return false;
 }
+#elif defined(__APPLE__)
+
+#include <sys/sysctl.h>
+
+bool is_64()
+{
+    const size_t BUFF_LEN = 1024;
+    char buffer[BUFF_LEN] = {};
+
+    size_t buffer_len = BUFF_LEN;
+
+    sysctlbyname("hw.cpu64bit_capable", &buffer, &buffer_len, nullptr, 0);
+    
+    return 0 != *reinterpret_cast<int*>(buffer);
+}
+
+#endif
 
 int main(int argc , char ** argv)
 {
